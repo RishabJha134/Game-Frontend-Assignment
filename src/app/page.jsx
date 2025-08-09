@@ -9,7 +9,6 @@ export default function HomePage() {
   const { isAuthenticated, loading } = useAuthContext();
 
   useEffect(() => {
-    // Create demo user if it doesn't exist
     const existingUsers = JSON.parse(localStorage.getItem('gameHub_users') || '[]');
     const demoUser = existingUsers.find(u => u.email === 'demo@gamehub.com');
     
@@ -24,7 +23,6 @@ export default function HomePage() {
       localStorage.setItem('gameHub_users', JSON.stringify(existingUsers));
     }
 
-    // Redirect based on authentication status
     if (!loading) {
       if (isAuthenticated) {
         router.push('/games');

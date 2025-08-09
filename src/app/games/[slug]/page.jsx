@@ -42,12 +42,12 @@ export default function GamePage() {
 
   if (!GameComponent || !info) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
         <Navigation />
         <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">Game Not Found</h1>
-          <p className="text-gray-600 mb-8">The game you're looking for doesn't exist.</p>
-          <a href="/games" className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-200">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">Game Not Found</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">The game you're looking for doesn't exist.</p>
+          <a href="/games" className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 dark:hover:bg-purple-500 transition duration-200">
             Back to Games
           </a>
         </div>
@@ -56,23 +56,21 @@ export default function GamePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Navigation />
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Game Header */}
         <div className="text-center mb-8">
           <div className="text-6xl mb-4">{info.emoji}</div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">{info.name}</h1>
-          <p className="text-lg text-gray-600 mb-4">{info.description}</p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto">
-            <p className="text-blue-800">
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">{info.name}</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 mb-4">{info.description}</p>
+          <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 max-w-2xl mx-auto">
+            <p className="text-blue-800 dark:text-blue-300">
               <strong>How to play:</strong> {info.instructions}
             </p>
           </div>
         </div>
 
-        {/* Game Component */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-gray-800">
           <GameComponent />
         </div>
       </div>

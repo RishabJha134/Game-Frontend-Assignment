@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '../AuthProvider';
+import OrientationHandler from '../OrientationHandler';
 
 const PRIZES = [
   { emoji: '💎', name: 'Diamond', points: 100, rarity: 'Legendary' },
@@ -18,19 +19,19 @@ const PRIZES = [
 ];
 
 export default function LuckyBox() {
-  const [gameState, setGameState] = useState('ready'); // 'ready', 'revealing', 'finished'
+  const [gameState, setGameState] = useState('ready');
   const [selectedBox, setSelectedBox] = useState(null);
   const [prizes, setPrizes] = useState([]);
   const [totalScore, setTotalScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const [rounds, setRounds] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const gameFinishedRef = useRef(false);
   
   const router = useRouter();
   const { user } = useAuthContext();
 
   useEffect(() => {
-    // Load best score from localStorage
     const history = JSON.parse(localStorage.getItem('gameHub_history') || '[]');
     const luckyBoxHistory = history.filter(h => h.gameId === 'lucky-box');
     if (luckyBoxHistory.length > 0) {
@@ -50,6 +51,7 @@ export default function LuckyBox() {
     setSelectedBox(null);
     setRounds(0);
     setTotalScore(0);
+    gameFinishedRef.current = false; // Reset the finished flag
   };
 
   const selectBox = (boxIndex) => {
@@ -68,13 +70,11 @@ export default function LuckyBox() {
       setRounds(newRounds);
       setIsAnimating(false);
       
-      // Check if game should continue (max 5 rounds)
       if (newRounds >= 5) {
-        finishGame(newScore);
+        finishGame(newScore, newRounds);
       } else {
         setTimeout(() => {
           if (newRounds < 5) {
-            // Continue to next round
             setPrizes(generatePrizes());
             setSelectedBox(null);
             setGameState('ready');
@@ -84,25 +84,27 @@ export default function LuckyBox() {
     }, 1500);
   };
 
-  const finishGame = (finalScore = totalScore) => {
+  const finishGame = (finalScore = totalScore, finalRounds = rounds) => {
+    // Prevent duplicate saves
+    if (gameFinishedRef.current) return;
+    gameFinishedRef.current = true;
+    
     setGameState('finished');
     
-    // Save to history
     const gameResult = {
       id: Date.now(),
       gameId: 'lucky-box',
       gameName: 'Lucky Box',
       score: finalScore,
-      rounds: rounds,
+      rounds: finalRounds,
       playedAt: new Date().toISOString(),
-      userId: user.email
+      userId: user?.email || 'guest'
     };
     
     const history = JSON.parse(localStorage.getItem('gameHub_history') || '[]');
     history.push(gameResult);
     localStorage.setItem('gameHub_history', JSON.stringify(history));
     
-    // Update best score
     if (finalScore > bestScore) {
       setBestScore(finalScore);
     }
@@ -115,6 +117,7 @@ export default function LuckyBox() {
     setTotalScore(0);
     setRounds(0);
     setIsAnimating(false);
+    gameFinishedRef.current = false; // Reset the finished flag
   };
 
   const getRarityColor = (rarity) => {
@@ -127,7 +130,6 @@ export default function LuckyBox() {
     }
   };
 
-  // Initial setup
   useEffect(() => {
     if (prizes.length === 0) {
       setPrizes(generatePrizes());
@@ -135,8 +137,8 @@ export default function LuckyBox() {
   }, [prizes.length]);
 
   return (
+    <OrientationHandler preferredOrientation="both">
     <div className="text-center">
-      {/* Game Stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="bg-yellow-50 p-4 rounded-lg">
           <div className="text-2xl font-bold text-yellow-600">{rounds}/5</div>
@@ -152,7 +154,6 @@ export default function LuckyBox() {
         </div>
       </div>
 
-      {/* Game Instructions */}
       {rounds === 0 && gameState === 'ready' && (
         <div className="text-lg text-gray-600 mb-8">
           Choose a mystery box to reveal your prize! You get 5 rounds to collect points.
@@ -165,8 +166,7 @@ export default function LuckyBox() {
         </div>
       )}
 
-      {/* Boxes */}
-      {(gameState === 'ready' || gameState === 'revealing') && (
+  {(gameState === 'ready' || gameState === 'revealing') && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
           {[0, 1, 2].map((boxIndex) => (
             <div
@@ -185,7 +185,6 @@ export default function LuckyBox() {
                 minHeight: '200px'
               }}
             >
-              {/* Box Lid */}
               <div className={`transition-all duration-1000 ${
                 selectedBox === boxIndex && gameState === 'revealing'
                   ? 'transform -translate-y-4 rotate-12 opacity-50'
@@ -196,7 +195,6 @@ export default function LuckyBox() {
                 <div className="text-yellow-100 text-sm">Click to open!</div>
               </div>
 
-              {/* Revealed Prize */}
               {selectedBox === boxIndex && gameState === 'revealing' && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-white rounded-2xl border-4 border-yellow-400 transition-all duration-500">
                   <div className="text-6xl mb-2 animate-bounce">{prizes[boxIndex]?.emoji}</div>
@@ -212,8 +210,7 @@ export default function LuckyBox() {
         </div>
       )}
 
-      {/* Game Finished */}
-      {gameState === 'finished' && (
+  {gameState === 'finished' && (
         <div className="space-y-6">
           <div className="text-6xl mb-4">
             {totalScore > bestScore ? '🎉' : totalScore >= 200 ? '🌟' : '🎁'}
@@ -255,7 +252,6 @@ export default function LuckyBox() {
         </div>
       )}
 
-      {/* Start Game Button (first time) */}
       {rounds === 0 && gameState === 'ready' && totalScore === 0 && (
         <button
           onClick={startGame}
@@ -264,6 +260,15 @@ export default function LuckyBox() {
           🎁 Start Lucky Box Game
         </button>
       )}
+      {gameState === 'ready' && rounds > 0 && (
+        <button
+          onClick={finishGame}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium"
+        >
+          Finish Early
+        </button>
+      )}
     </div>
+    </OrientationHandler>
   );
 }

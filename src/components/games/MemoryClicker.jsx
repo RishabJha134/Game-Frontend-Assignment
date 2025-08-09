@@ -3,13 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '../AuthProvider';
+import OrientationHandler from '../OrientationHandler';
 
 const COLORS = ['🔴', '🟡', '🟢', '🔵', '🟣', '🟠'];
 
 export default function MemoryClicker() {
   const [sequence, setSequence] = useState([]);
   const [playerSequence, setPlayerSequence] = useState([]);
-  const [gameState, setGameState] = useState('ready'); // 'ready', 'showing', 'playing', 'finished'
+  const [gameState, setGameState] = useState('ready');
   const [currentLevel, setCurrentLevel] = useState(1);
   const [showingIndex, setShowingIndex] = useState(-1);
   const [score, setScore] = useState(0);
@@ -19,9 +20,9 @@ export default function MemoryClicker() {
   const router = useRouter();
   const { user } = useAuthContext();
   const timeoutRef = useRef(null);
+  const gameFinishedRef = useRef(false);
 
   useEffect(() => {
-    // Load best score from localStorage
     const history = JSON.parse(localStorage.getItem('gameHub_history') || '[]');
     const memoryHistory = history.filter(h => h.gameId === 'memory-clicker');
     if (memoryHistory.length > 0) {
@@ -42,8 +43,9 @@ export default function MemoryClicker() {
     setCurrentLevel(1);
     setScore(0);
     setPlayerSequence([]);
+    gameFinishedRef.current = false; // Reset the finished flag
     setMessage('Watch the sequence...');
-    const newSequence = generateSequence(3);
+    const newSequence = generateSequence(3); // Start with 3 colors
     setSequence(newSequence);
     showSequence(newSequence);
   };
@@ -51,6 +53,12 @@ export default function MemoryClicker() {
   const showSequence = (seq) => {
     setGameState('showing');
     setShowingIndex(-1);
+    
+    // Clear any existing timeouts
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     
     let index = 0;
     const showNext = () => {
@@ -66,6 +74,7 @@ export default function MemoryClicker() {
       } else {
         setGameState('playing');
         setMessage('Now repeat the sequence!');
+        setShowingIndex(-1);
       }
     };
     
@@ -78,17 +87,17 @@ export default function MemoryClicker() {
     const newPlayerSequence = [...playerSequence, colorIndex];
     setPlayerSequence(newPlayerSequence);
 
-    // Check if the click is correct
+    // Check if the current click matches the expected color in the sequence
     if (newPlayerSequence[newPlayerSequence.length - 1] !== sequence[newPlayerSequence.length - 1]) {
-      // Wrong sequence
-      finishGame(false);
+      finishGame(false, score);
       return;
     }
 
-    // Check if sequence is complete
+    // Check if the player has completed the current sequence
     if (newPlayerSequence.length === sequence.length) {
-      // Correct sequence completed
-      const newScore = score + sequence.length * 10;
+      const levelBonus = currentLevel * 10;
+      const sequenceBonus = sequence.length * 5;
+      const newScore = score + levelBonus + sequenceBonus;
       setScore(newScore);
       setMessage('Correct! Next level...');
       
@@ -98,13 +107,13 @@ export default function MemoryClicker() {
         setPlayerSequence([]);
         
         if (nextLevel <= 5) {
-          // Generate longer sequence
-          const newSequence = generateSequence(2 + nextLevel);
+          // Progressive difficulty: start with 3, then add 1 each level
+          const sequenceLength = 2 + nextLevel;
+          const newSequence = generateSequence(sequenceLength);
           setSequence(newSequence);
           setMessage('Watch the new sequence...');
           showSequence(newSequence);
         } else {
-          // Game completed successfully
           finishGame(true, newScore);
         }
       }, 1500);
@@ -112,27 +121,34 @@ export default function MemoryClicker() {
   };
 
   const finishGame = (success, finalScore = score) => {
+    // Prevent duplicate saves
+    if (gameFinishedRef.current) return;
+    gameFinishedRef.current = true;
+    
     setGameState('finished');
+    
+    // Clear any pending timeouts to prevent race conditions
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
     
-    // Save to history
+    const actualLevel = success ? 5 : Math.max(1, currentLevel);
+    
     const gameResult = {
       id: Date.now(),
       gameId: 'memory-clicker',
       gameName: 'Memory Clicker',
       score: finalScore,
-      level: success ? 5 : currentLevel - 1,
+      level: actualLevel,
       playedAt: new Date().toISOString(),
-      userId: user.email
+      userId: user?.email || 'guest'
     };
     
     const history = JSON.parse(localStorage.getItem('gameHub_history') || '[]');
     history.push(gameResult);
     localStorage.setItem('gameHub_history', JSON.stringify(history));
     
-    // Update best score
     if (finalScore > bestScore) {
       setBestScore(finalScore);
     }
@@ -141,6 +157,13 @@ export default function MemoryClicker() {
   };
 
   const resetGame = () => {
+    // Clear any pending timeouts
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    
+    gameFinishedRef.current = false; // Reset the finished flag
     setGameState('ready');
     setSequence([]);
     setPlayerSequence([]);
@@ -148,22 +171,20 @@ export default function MemoryClicker() {
     setScore(0);
     setShowingIndex(-1);
     setMessage('');
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
   };
 
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
     };
   }, []);
 
   return (
+    <OrientationHandler preferredOrientation="portrait">
     <div className="text-center">
-      {/* Game Stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="bg-purple-50 p-4 rounded-lg">
           <div className="text-2xl font-bold text-purple-600">{currentLevel}</div>
@@ -179,14 +200,12 @@ export default function MemoryClicker() {
         </div>
       </div>
 
-      {/* Message */}
       {message && (
         <div className="text-lg font-semibold text-gray-700 mb-6 h-8">
           {message}
         </div>
       )}
 
-      {/* Game Area */}
       {gameState === 'ready' && (
         <div className="space-y-6">
           <div className="text-lg text-gray-600 mb-6">
@@ -201,7 +220,7 @@ export default function MemoryClicker() {
         </div>
       )}
 
-      {(gameState === 'showing' || gameState === 'playing') && (
+  {(gameState === 'showing' || gameState === 'playing') && (
         <div className="space-y-6">
           <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
             {COLORS.map((color, index) => (
@@ -230,6 +249,14 @@ export default function MemoryClicker() {
             <div className="text-sm text-gray-500">
               Progress: {playerSequence.length} / {sequence.length}
             </div>
+          )}
+          {gameState === 'playing' && (
+            <button
+              onClick={() => finishGame(false, score)}
+              className="mt-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium"
+            >
+              Finish Early
+            </button>
           )}
         </div>
       )}
@@ -276,5 +303,6 @@ export default function MemoryClicker() {
         </div>
       )}
     </div>
+    </OrientationHandler>
   );
 }

@@ -22,7 +22,6 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      // Validate inputs
       if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
         throw new Error('Please fill in all fields');
       }
@@ -39,7 +38,6 @@ export default function RegisterPage() {
         throw new Error('Passwords do not match');
       }
 
-      // Register user
       const userData = {
         name: formData.name,
         email: formData.email,
@@ -81,7 +79,7 @@ export default function RegisterPage() {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
+              className="w-full text-black px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
               placeholder="Enter your full name"
               required
             />
@@ -97,7 +95,7 @@ export default function RegisterPage() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
+              className="w-full text-black px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
               placeholder="Enter your email"
               required
             />
@@ -113,7 +111,7 @@ export default function RegisterPage() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
+              className="w-full text-black px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
               placeholder="Enter your password"
               required
             />
@@ -129,7 +127,7 @@ export default function RegisterPage() {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
+              className="w-full text-black px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
               placeholder="Confirm your password"
               required
             />

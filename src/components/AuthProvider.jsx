@@ -23,11 +23,9 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (!auth.loading) {
-      // Redirect to login if not authenticated and not on public pages
       if (!auth.isAuthenticated && !['/login', '/register'].includes(pathname)) {
         router.push('/login');
       }
-      // Redirect to games if authenticated and on login/register pages
       else if (auth.isAuthenticated && ['/login', '/register'].includes(pathname)) {
         router.push('/games');
       }

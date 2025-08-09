@@ -7,25 +7,21 @@ export default function HistoryPage() {
   const [history, setHistory] = useState([]);
   const [filteredHistory, setFilteredHistory] = useState([]);
   const [selectedGame, setSelectedGame] = useState('all');
-  const [sortBy, setSortBy] = useState('date'); // 'date', 'score', 'game'
+  const [sortBy, setSortBy] = useState('date');
 
   useEffect(() => {
-    // Load history from localStorage
     const gameHistory = JSON.parse(localStorage.getItem('gameHub_history') || '[]');
-    setHistory(gameHistory.reverse()); // Show most recent first
+  setHistory(gameHistory.reverse());
     setFilteredHistory(gameHistory);
   }, []);
 
   useEffect(() => {
-    // Filter and sort history
     let filtered = history;
     
-    // Filter by game
     if (selectedGame !== 'all') {
       filtered = history.filter(h => h.gameId === selectedGame);
     }
     
-    // Sort
     filtered = [...filtered].sort((a, b) => {
       switch(sortBy) {
         case 'score':
@@ -97,52 +93,45 @@ export default function HistoryPage() {
   const stats = getStats();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Navigation />
       
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">
             📜 Game History
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 dark:text-gray-300">
             Track your gaming progress and achievements
           </p>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">{stats.totalGames}</div>
-            <div className="text-gray-600 text-sm">Total Games</div>
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg text-center border border-gray-100 dark:border-gray-800">
+            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">{stats.totalGames}</div>
+            <div className="text-gray-600 dark:text-gray-400 text-sm">Total Games</div>
           </div>
-          {/* <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <div className="text-3xl font-bold text-purple-600 mb-2">{stats.gamesPlayed}</div>
-            <div className="text-gray-600 text-sm">Games Tried</div>
-          </div> */}
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">{stats.totalScore}</div>
-            <div className="text-gray-600 text-sm">Total Score</div>
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg text-center border border-gray-100 dark:border-gray-800">
+            <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">{stats.totalScore}</div>
+            <div className="text-gray-600 dark:text-gray-400 text-sm">Total Score</div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <div className="text-3xl font-bold text-yellow-600 mb-2">{stats.bestScore}</div>
-            <div className="text-gray-600 text-sm">Best Score</div>
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg text-center border border-gray-100 dark:border-gray-800">
+            <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mb-2">{stats.bestScore}</div>
+            <div className="text-gray-600 dark:text-gray-400 text-sm">Best Score</div>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+  <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 mb-8 border border-gray-100 dark:border-gray-800">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex flex-col sm:flex-row gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Filter by Game:
                 </label>
                 <select
                   value={selectedGame}
                   onChange={(e) => setSelectedGame(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
                   <option value="all">All Games</option>
                   <option value="tap-counter">👆 Tap Counter</option>
@@ -152,13 +141,13 @@ export default function HistoryPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Sort by:
                 </label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
                   <option value="date">Date (Newest)</option>
                   <option value="score">Score (Highest)</option>
@@ -178,17 +167,16 @@ export default function HistoryPage() {
           </div>
         </div>
 
-        {/* History List */}
         {filteredHistory.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-lg p-12 text-center">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-12 text-center border border-gray-100 dark:border-gray-800">
             <div className="text-6xl mb-4">🎮</div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">No Games Played Yet</h3>
-            <p className="text-gray-600 mb-6">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">No Games Played Yet</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               Start playing some games to see your history here!
             </p>
             <a
               href="/games"
-              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition duration-200"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 dark:hover:from-purple-500 dark:hover:to-blue-500 transition duration-200"
             >
               Play Games
             </a>
@@ -198,16 +186,16 @@ export default function HistoryPage() {
             {filteredHistory.map((game, index) => (
               <div
                 key={game.id || index}
-                className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-200"
+                className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-200 border border-gray-100 dark:border-gray-800"
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                   <div className="flex items-center space-x-4 mb-4 md:mb-0">
                     <div className="text-4xl">{getGameEmoji(game.gameId)}</div>
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-800">
+                      <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
                         {game.gameName}
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 dark:text-gray-400">
                         {formatDate(game.playedAt)}
                       </p>
                     </div>

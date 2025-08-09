@@ -7,7 +7,6 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on component mount
     const savedUser = localStorage.getItem('gameHub_user');
     console.log(savedUser);
     if (savedUser) {
@@ -27,21 +26,16 @@ export const useAuth = () => {
   };
 
   const register = (userData) => {
-    // In a real app, you'd send this to a server
-    // For now, we'll just save it locally
     const existingUsers = JSON.parse(localStorage.getItem('gameHub_users') || '[]');
     
-    // Check if user already exists
     const userExists = existingUsers.find(u => u.email === userData.email);
     if (userExists) {
       throw new Error('User already exists with this email');
     }
     
-    // Add new user
     existingUsers.push(userData);
     localStorage.setItem('gameHub_users', JSON.stringify(existingUsers));
     
-    // Auto login after registration
     login(userData);
   };
 

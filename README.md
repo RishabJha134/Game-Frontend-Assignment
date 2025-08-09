@@ -172,8 +172,11 @@ npm run lint     # Run ESLint
 ## 🌟 Bonus Features Implemented
 
 - **📊 Dashboard Statistics**: Total games, best scores, progress tracking
-- **🎨 Smooth Animations**: CSS transitions and transforms
-- **🔄 Auto-rotation Detection**: Orientation-aware layouts
+- **� Leaderboard**: Mock + real top scores blended (no backend)
+- **🌗 Dark Mode**: Theme toggle with persistence
+- **⏰ Hourly Free Game Reminder**: Countdown timer resets every hour
+- **�🎨 Smooth Animations**: CSS transitions and transforms
+- **🔄 Orientation Enforcement**: Portrait preference for some games with wrapper
 - **💾 Data Persistence**: Complete local storage implementation
 - **🎯 Game Variety**: Three different game types with unique mechanics
 
@@ -208,11 +211,13 @@ npm run start
 
 ## 🎯 Evaluation Criteria Met
 
-- ✅ **Fully functional core features**
+- ✅ **Fully functional core features (auth, games, history)**
 - ✅ **Mobile-first & responsive design**
-- ✅ **Portrait/landscape adaptation**
+- ✅ **Portrait/landscape adaptation with orientation handler**
+- ✅ **Finish buttons for all games**
 - ✅ **Clean component structure & UI polish**
-- ✅ **localStorage for persistence**
+- ✅ **localStorage for persistence (users, sessions, scores)**
+- ✅ **Leaderboard, dark mode, hourly reminder bonuses**
 - ✅ **Creative touches & animations**
 
 ## 🤝 Contributing

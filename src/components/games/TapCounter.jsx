@@ -3,18 +3,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '../AuthProvider';
+import OrientationHandler from '../OrientationHandler';
 
 export default function TapCounter() {
   const [taps, setTaps] = useState(0);
   const [timeLeft, setTimeLeft] = useState(10);
-  const [gameState, setGameState] = useState('ready'); // 'ready', 'playing', 'finished'
+  const [gameState, setGameState] = useState('ready');
   const [bestScore, setBestScore] = useState(0);
   const intervalRef = useRef(null);
+  const currentTapsRef = useRef(0);
+  const gameFinishedRef = useRef(false);
   const router = useRouter();
   const { user } = useAuthContext();
 
   useEffect(() => {
-    // Load best score from localStorage
     const history = JSON.parse(localStorage.getItem('gameHub_history') || '[]');
     const tapCounterHistory = history.filter(h => h.gameId === 'tap-counter');
     if (tapCounterHistory.length > 0) {
@@ -26,12 +28,14 @@ export default function TapCounter() {
   const startGame = () => {
     setGameState('playing');
     setTaps(0);
+    currentTapsRef.current = 0;
+    gameFinishedRef.current = false; // Reset the finished flag
     setTimeLeft(10);
     
     intervalRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          finishGame();
+          finishGame(currentTapsRef.current);
           return 0;
         }
         return prev - 1;
@@ -39,41 +43,51 @@ export default function TapCounter() {
     }, 1000);
   };
 
-  const finishGame = () => {
+  const finishGame = (finalTaps = null) => {
+    // Prevent duplicate saves
+    if (gameFinishedRef.current) return;
+    gameFinishedRef.current = true;
+    
     setGameState('finished');
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
     
-    // Save to history
+    const finalScore = finalTaps !== null ? finalTaps : currentTapsRef.current;
+    
     const gameResult = {
       id: Date.now(),
       gameId: 'tap-counter',
       gameName: 'Tap Counter',
-      score: taps,
+      score: finalScore,
       playedAt: new Date().toISOString(),
-      userId: user.email
+      userId: user?.email || 'guest'
     };
     
     const history = JSON.parse(localStorage.getItem('gameHub_history') || '[]');
     history.push(gameResult);
     localStorage.setItem('gameHub_history', JSON.stringify(history));
     
-    // Update best score
-    if (taps > bestScore) {
-      setBestScore(taps);
+    if (finalScore > bestScore) {
+      setBestScore(finalScore);
     }
   };
 
   const handleTap = () => {
     if (gameState === 'playing') {
-      setTaps(prev => prev + 1);
+      setTaps(prev => {
+        const newTaps = prev + 1;
+        currentTapsRef.current = newTaps;
+        return newTaps;
+      });
     }
   };
 
   const resetGame = () => {
     setGameState('ready');
     setTaps(0);
+    currentTapsRef.current = 0;
+    gameFinishedRef.current = false; // Reset the finished flag
     setTimeLeft(10);
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -89,8 +103,8 @@ export default function TapCounter() {
   }, []);
 
   return (
+    <OrientationHandler preferredOrientation="portrait">
     <div className="text-center">
-      {/* Game Stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="bg-blue-50 p-4 rounded-lg">
           <div className="text-2xl font-bold text-blue-600">{taps}</div>
@@ -106,7 +120,6 @@ export default function TapCounter() {
         </div>
       </div>
 
-      {/* Game Area */}
       {gameState === 'ready' && (
         <div className="space-y-6">
           <div className="text-lg text-gray-600 mb-6">
@@ -138,6 +151,12 @@ export default function TapCounter() {
           <div className="text-sm text-gray-500">
             Taps: {taps} | Time: {timeLeft}s
           </div>
+          <button
+            onClick={() => finishGame(currentTapsRef.current)}
+            className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium"
+          >
+            Finish Early
+          </button>
         </div>
       )}
 
@@ -181,5 +200,6 @@ export default function TapCounter() {
         </div>
       )}
     </div>
+    </OrientationHandler>
   );
 }

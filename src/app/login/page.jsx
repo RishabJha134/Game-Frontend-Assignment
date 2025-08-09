@@ -20,7 +20,6 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Validate inputs
       if (!formData.email || !formData.password) {
         throw new Error('Please fill in all fields');
       }
@@ -29,7 +28,6 @@ export default function LoginPage() {
         throw new Error('Please enter a valid email');
       }
 
-      // Check if user exists in localStorage
       const existingUsers = JSON.parse(localStorage.getItem('gameHub_users') || '[]');
       const user = existingUsers.find(u => 
         u.email === formData.email && u.password === formData.password
@@ -39,7 +37,6 @@ export default function LoginPage() {
         throw new Error('Invalid email or password');
       }
 
-      // Login successful
       login(user);
     } catch (err) {
       setError(err.message);
@@ -74,7 +71,7 @@ export default function LoginPage() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+              className="w-full text-black px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
               placeholder="Enter your email"
               required
             />
@@ -90,7 +87,7 @@ export default function LoginPage() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+              className="w-full text-black px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
               placeholder="Enter your password"
               required
             />

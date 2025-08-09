@@ -12,11 +12,7 @@ export default function OrientationHandler({ children, preferredOrientation = 'b
       setOrientation(isPortrait ? 'portrait' : 'landscape');
       setIsSmallScreen(window.innerHeight < 500);
     };
-
-    // Initial check
     checkOrientation();
-
-    // Listen for orientation changes
     window.addEventListener('resize', checkOrientation);
     window.addEventListener('orientationchange', checkOrientation);
 
@@ -26,7 +22,6 @@ export default function OrientationHandler({ children, preferredOrientation = 'b
     };
   }, []);
 
-  // Show orientation notice for certain games in landscape mode on small screens
   if (preferredOrientation === 'portrait' && orientation === 'landscape' && isSmallScreen) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 text-white p-4">
