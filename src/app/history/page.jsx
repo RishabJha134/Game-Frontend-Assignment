@@ -54,10 +54,10 @@ export default function HistoryPage() {
         if (score >= 20) return 'text-blue-600';
         return 'text-gray-600';
       case 'memory-clicker':
-        if (score >= 100) return 'text-yellow-600';
-        if (score >= 60) return 'text-green-600';
-        if (score >= 30) return 'text-blue-600';
-        return 'text-gray-600';
+        if (score >= 10) return 'text-yellow-600'; // Amazing score
+        if (score >= 7) return 'text-green-600';   // Great score
+        if (score >= 4) return 'text-blue-600';    // Good score
+        return 'text-gray-600';                     // Beginner score
       case 'lucky-box':
         if (score >= 250) return 'text-yellow-600';
         if (score >= 200) return 'text-green-600';
